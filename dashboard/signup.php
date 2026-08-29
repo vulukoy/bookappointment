@@ -5,7 +5,7 @@ if (current_provider()) { header('Location: /dashboard/index.php'); exit; }
 
 $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    [$ok, $err] = signup($_POST['username'] ?? '', $_POST['email'] ?? '', $_POST['password'] ?? '');
+    [$ok, $err] = signup($_POST['username'] ?? '', $_POST['business_name'] ?? '', $_POST['email'] ?? '', $_POST['password'] ?? '');
     if ($ok) { header('Location: /dashboard/index.php'); exit; }
     $error = $err;
 }
@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Sign Up — BookMe</title>
+  <title>Sign Up — BookAppointment.me</title>
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
@@ -24,8 +24,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <p class="muted">Free to start. Takes 60 seconds.</p>
     <?php if ($error): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
     <form method="POST">
-      <label>Choose a username (this becomes your link)</label>
+      <label>Choose a username (used to sign in)</label>
       <input type="text" name="username" placeholder="jane-hair" required>
+      <label>Business name</label>
+      <input type="text" name="business_name" placeholder="Jane Hair Studio" required>
       <label>Email</label>
       <input type="email" name="email" required>
       <label>Password</label>

@@ -23,6 +23,23 @@ function require_login(): array {
     return $p;
 }
 
+function booking_path(array $provider): string {
+    return '/book/' . rawurlencode($provider['booking_slug'] ?: $provider['username']);
+}
+
+function booking_slug_available(string $slug, ?int $excludeId = null): bool {
+    $sql = 'SELECT 1 FROM providers WHERE (booking_slug = ? OR username = ?)';
+    $params = [$slug, $slug];
+    if ($excludeId !== null) {
+        $sql .= ' AND id != ?';
+        $params[] = $excludeId;
+    }
+    $sql .= ' LIMIT 1';
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    return !$stmt->fetch();
+}
+
 function login(string $email, string $password): bool {
     $stmt = db()->prepare('SELECT * FROM providers WHERE email = ?');
     $stmt->execute([$email]);
@@ -34,13 +51,17 @@ function login(string $email, string $password): bool {
     return false;
 }
 
-function signup(string $username, string $email, string $password): array {
+function signup(string $username, string $businessName, string $email, string $password): array {
     $username = strtolower(trim($username));
+    $businessName = trim($businessName);
     if (!preg_match('/^[a-z0-9\-]{3,30}$/', $username)) {
         return [false, 'Username must be 3-30 characters: lowercase letters, numbers, hyphens only.'];
     }
     if (strlen($password) < 6) {
         return [false, 'Password must be at least 6 characters.'];
+    }
+    if ($businessName === '') {
+        return [false, 'Business name is required.'];
     }
     $stmt = db()->prepare('SELECT id FROM providers WHERE username = ? OR email = ?');
     $stmt->execute([$username, $email]);
@@ -48,9 +69,11 @@ function signup(string $username, string $email, string $password): array {
         return [false, 'That username or email is already taken.'];
     }
     $hash = password_hash($password, PASSWORD_DEFAULT);
-    $stmt = db()->prepare('INSERT INTO providers (username, email, password_hash, business_name) VALUES (?, ?, ?, ?)');
-    $stmt->execute([$username, $email, $hash, $username]);
-    $id = db()->lastInsertId();
+    $pdo = db();
+    $bookingSlug = make_unique_booking_slug($pdo, $businessName, $username);
+    $stmt = $pdo->prepare('INSERT INTO providers (username, booking_slug, email, password_hash, business_name) VALUES (?, ?, ?, ?, ?)');
+    $stmt->execute([$username, $bookingSlug, $email, $hash, $businessName]);
+    $id = $pdo->lastInsertId();
 
     // seed sensible default availability: Mon-Fri 9-5
     $availStmt = db()->prepare('INSERT INTO availability (provider_id, day_of_week, start_time, end_time) VALUES (?, ?, ?, ?)');

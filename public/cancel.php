@@ -3,7 +3,7 @@ require_once __DIR__ . '/../includes/db.php';
 
 $token = $_GET['token'] ?? '';
 $stmt = db()->prepare("
-    SELECT b.*, s.name AS service_name, p.business_name, p.username
+    SELECT b.*, s.name AS service_name, p.business_name, p.username, p.booking_slug
     FROM bookings b
     JOIN services s ON s.id = b.service_id
     JOIN providers p ON p.id = b.provider_id
@@ -33,7 +33,7 @@ if ($booking && $_SERVER['REQUEST_METHOD'] === 'POST') {
       <p class="error">Booking not found or link is invalid.</p>
     <?php elseif ($cancelled || $booking['status'] === 'cancelled'): ?>
       <div class="success-box">Your booking has been cancelled.</div>
-      <a href="/public/book.php?u=<?= urlencode($booking['username']) ?>" class="btn secondary">Book a new appointment</a>
+      <a href="/book/<?= rawurlencode($booking['booking_slug'] ?: $booking['username']) ?>" class="btn secondary">Book a new appointment</a>
     <?php else: ?>
       <h1>Cancel this booking?</h1>
       <p><strong><?= htmlspecialchars($booking['service_name']) ?></strong> with <?= htmlspecialchars($booking['business_name']) ?></p>

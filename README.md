@@ -1,4 +1,4 @@
-# BookMe — Simple Appointment Booking Page
+# BookAppointment.me — Simple Appointment Booking Page
 
 A minimal PHP + SQLite app that lets a solo service provider (hairdresser,
 tutor, therapist, consultant, trainer) share one link where clients pick a
@@ -24,8 +24,8 @@ php -S localhost:8000 -t .
 Then visit:
 - `http://localhost:8000/public/index.php` — marketing/landing page
 - `http://localhost:8000/dashboard/signup.php` — create a provider account
-- `http://localhost:8000/public/book.php?u=yourusername` — the public
-  booking page clients would use
+- `http://localhost:8000/book/your-business-name` — the public booking page
+  clients would use. Providers can edit this address from their profile.
 
 The SQLite database is created automatically the first time any page runs.
 Delete `data/app.db` at any point to reset to a clean state.
@@ -82,7 +82,7 @@ PHPMailer (or an API like Postmark/SendGrid) inside `create_booking()` in
 
 **Billing:** Add a `plan` gate (already a column on `providers`) tied to
 Stripe Checkout + Billing Portal. Suggested free-tier limits: 1 service,
-"Powered by BookMe" badge (already in the footer), and a cap on
+"Powered by BookAppointment.me" badge (already in the footer), and a cap on
 bookings/month enforced in `create_booking()`.
 
 **Security before going live:**

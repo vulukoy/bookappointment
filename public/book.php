@@ -5,9 +5,9 @@ require_once __DIR__ . '/../includes/slots.php';
 // AJAX endpoint: return available slots for a given service + date
 if (isset($_GET['ajax']) && $_GET['ajax'] === 'slots') {
     header('Content-Type: application/json');
-    $username = $_GET['u'] ?? '';
-    $stmt = db()->prepare('SELECT id FROM providers WHERE username = ?');
-    $stmt->execute([$username]);
+    $identifier = $_GET['u'] ?? '';
+    $stmt = db()->prepare('SELECT id FROM providers WHERE booking_slug = ? OR username = ? ORDER BY (booking_slug = ?) DESC LIMIT 1');
+    $stmt->execute([$identifier, $identifier, $identifier]);
     $provider = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$provider) { echo json_encode(['error' => 'not found']); exit; }
 
@@ -21,9 +21,9 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'slots') {
 // Handle booking submission
 $bookingResult = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['u'] ?? '';
-    $stmt = db()->prepare('SELECT id FROM providers WHERE username = ?');
-    $stmt->execute([$username]);
+    $identifier = $_POST['u'] ?? '';
+    $stmt = db()->prepare('SELECT id FROM providers WHERE booking_slug = ? OR username = ? ORDER BY (booking_slug = ?) DESC LIMIT 1');
+    $stmt->execute([$identifier, $identifier, $identifier]);
     $p = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($p) {
         [$ok, $msg, $token] = create_booking(
@@ -39,14 +39,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$username = $_GET['u'] ?? ($_POST['u'] ?? '');
-$stmt = db()->prepare('SELECT * FROM providers WHERE username = ?');
-$stmt->execute([$username]);
+$identifier = $_GET['u'] ?? ($_POST['u'] ?? '');
+$stmt = db()->prepare('SELECT * FROM providers WHERE booking_slug = ? OR username = ? ORDER BY (booking_slug = ?) DESC LIMIT 1');
+$stmt->execute([$identifier, $identifier, $identifier]);
 $provider = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$provider) {
     http_response_code(404);
     echo "<h1>Page not found</h1><p>No provider with that link.</p>";
+    exit;
+}
+
+$bookingSlug = $provider['booking_slug'] ?: $provider['username'];
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && $identifier !== $bookingSlug) {
+    header('Location: /book/' . rawurlencode($bookingSlug), true, 301);
     exit;
 }
 
@@ -73,10 +79,10 @@ $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
           A confirmation has been sent. You can cancel anytime using
           <a href="/public/cancel.php?token=<?= htmlspecialchars($bookingResult['token']) ?>">this link</a>.
         </div>
-        <a href="/public/book.php?u=<?= urlencode($username) ?>" class="btn secondary">Book another appointment</a>
+        <a href="/book/<?= rawurlencode($bookingSlug) ?>" class="btn secondary">Book another appointment</a>
       <?php else: ?>
         <p class="error"><?= htmlspecialchars($bookingResult['msg']) ?></p>
-        <a href="/public/book.php?u=<?= urlencode($username) ?>" class="btn secondary">Try again</a>
+        <a href="/book/<?= rawurlencode($bookingSlug) ?>" class="btn secondary">Try again</a>
       <?php endif; ?>
     </div>
   <?php else: ?>
@@ -112,8 +118,8 @@ $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   <div class="card" id="details-card" style="display:none;">
     <h2>3. Your details</h2>
-    <form method="POST" id="booking-form" action="/public/book.php?u=<?= urlencode($username) ?>">
-      <input type="hidden" name="u" value="<?= htmlspecialchars($username) ?>">
+    <form method="POST" id="booking-form" action="/book/<?= rawurlencode($bookingSlug) ?>">
+      <input type="hidden" name="u" value="<?= htmlspecialchars($bookingSlug) ?>">
       <input type="hidden" name="service_id" id="form-service-id">
       <input type="hidden" name="date" id="form-date">
       <input type="hidden" name="time" id="form-time">
@@ -129,11 +135,11 @@ $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   <?php endif; ?>
 
-  <p class="footer-badge">Powered by <a href="/">BookMe</a></p>
+  <p class="footer-badge">Powered by <a href="/">BookAppointment.me</a></p>
 </div>
 
 <script>
-const username = <?= json_encode($username) ?>;
+const bookingSlug = <?= json_encode($bookingSlug) ?>;
 let selectedServiceId = null, selectedDuration = null, selectedTime = null;
 let currentDate = new Date();
 
@@ -163,7 +169,7 @@ function loadSlots() {
   const slotsEl = document.getElementById('slots');
   slotsEl.innerHTML = '<p class="muted">Loading...</p>';
 
-  fetch(`/public/book.php?ajax=slots&u=${encodeURIComponent(username)}&service_id=${selectedServiceId}&date=${dateStr}`)
+  fetch(`/book/${encodeURIComponent(bookingSlug)}?ajax=slots&service_id=${selectedServiceId}&date=${dateStr}`)
     .then(r => r.json())
     .then(data => {
       const slots = data.slots || [];

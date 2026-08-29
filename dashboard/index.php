@@ -19,13 +19,13 @@ $stmt = db()->prepare("
 $stmt->execute([$provider['id']]);
 $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$bookLink = "/public/book.php?u=" . urlencode($provider['username']);
+$bookLink = booking_path($provider);
 ?>
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard — BookMe</title>
+  <title>Dashboard — BookAppointment.me</title>
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>

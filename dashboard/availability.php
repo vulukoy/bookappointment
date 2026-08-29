@@ -56,7 +56,7 @@ $blocked = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Availability — BookMe</title>
+  <title>Availability — BookAppointment.me</title>
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>

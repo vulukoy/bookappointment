@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Log In — BookMe</title>
+  <title>Log In — BookAppointment.me</title>
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>

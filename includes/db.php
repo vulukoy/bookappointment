@@ -14,9 +14,59 @@ function db(): PDO {
         $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+        ensure_provider_booking_slugs($pdo);
         //init_schema($pdo);
     }
     return $pdo;
+}
+
+function booking_slugify(string $value, string $fallback = 'provider'): string {
+    $value = strtolower(trim($value));
+    $value = preg_replace('/[^a-z0-9]+/', '-', $value);
+    $value = trim($value, '-');
+    return substr($value ?: $fallback, 0, 90);
+}
+
+function make_unique_booking_slug(PDO $pdo, string $source, string $fallback, ?int $excludeId = null): string {
+    $base = booking_slugify($source, $fallback);
+    $candidate = $base;
+    $suffix = 2;
+
+    while (true) {
+        $sql = 'SELECT 1 FROM providers WHERE (booking_slug = ? OR username = ?)';
+        $params = [$candidate, $candidate];
+        if ($excludeId !== null) {
+            $sql .= ' AND id != ?';
+            $params[] = $excludeId;
+        }
+        $sql .= ' LIMIT 1';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        if (!$stmt->fetch()) return $candidate;
+
+        $candidate = substr($base, 0, 90 - strlen((string)$suffix) - 1) . '-' . $suffix;
+        $suffix++;
+    }
+}
+
+function ensure_provider_booking_slugs(PDO $pdo): void {
+    $column = $pdo->query("SHOW COLUMNS FROM providers LIKE 'booking_slug'")->fetch();
+    if (!$column) {
+        $pdo->exec('ALTER TABLE providers ADD COLUMN booking_slug VARCHAR(100) NULL AFTER username');
+    }
+
+    $providers = $pdo->query("SELECT id, username, business_name FROM providers WHERE booking_slug IS NULL OR booking_slug = ''")->fetchAll(PDO::FETCH_ASSOC);
+    $update = $pdo->prepare('UPDATE providers SET booking_slug = ? WHERE id = ?');
+    foreach ($providers as $provider) {
+        $slug = make_unique_booking_slug($pdo, $provider['business_name'], $provider['username'], (int)$provider['id']);
+        $update->execute([$slug, $provider['id']]);
+    }
+
+    $pdo->exec('ALTER TABLE providers MODIFY booking_slug VARCHAR(100) NOT NULL');
+    $indexes = $pdo->query("SHOW INDEX FROM providers WHERE Key_name = 'uniq_providers_booking_slug'")->fetchAll(PDO::FETCH_ASSOC);
+    if (!$indexes) {
+        $pdo->exec('ALTER TABLE providers ADD UNIQUE INDEX uniq_providers_booking_slug (booking_slug)');
+    }
 }
 
 function init_schema(PDO $pdo): void {
@@ -24,6 +74,7 @@ function init_schema(PDO $pdo): void {
     CREATE TABLE IF NOT EXISTS providers (
         id INT PRIMARY KEY AUTO_INCREMENT,
         username VARCHAR(50) UNIQUE NOT NULL,
+        booking_slug VARCHAR(100) UNIQUE NOT NULL,
         email VARCHAR(255) NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
         business_name VARCHAR(255) DEFAULT '',

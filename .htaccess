@@ -1,0 +1,4 @@
+RewriteEngine On
+
+# Clean public booking pages, e.g. /book/benvolkan
+RewriteRule ^book/([a-z0-9-]+)/?$ public/book.php?u=$1 [L,QSA,NC]

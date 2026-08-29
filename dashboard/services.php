@@ -40,7 +40,7 @@ $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Services — BookMe</title>
+  <title>Services — BookAppointment.me</title>
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
