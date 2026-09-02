@@ -3,6 +3,8 @@ require_once __DIR__ . '/../includes/auth.php';
 $provider = require_login();
 $error = null;
 
+$host = preg_replace('/^www\./', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
+$host = preg_replace('/:\d+$/', '', $host);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $businessName = trim($_POST['business_name'] ?? '');
     $bookingSlugInput = trim($_POST['booking_slug'] ?? '');
@@ -21,6 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
+
+$bookLink =($_SERVER['REQUEST_SCHEME'] ?? 'http') . '://' . $_SERVER['HTTP_HOST'] . "/book/" . htmlspecialchars($_POST['booking_slug'] ?? $provider['booking_slug']);
 ?>
 <!DOCTYPE html>
 <html>
@@ -41,7 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <input type="text" name="business_name" value="<?= htmlspecialchars($_POST['business_name'] ?? $provider['business_name']) ?>" required>
       <label>Booking page address</label>
       <input type="text" name="booking_slug" value="<?= htmlspecialchars($_POST['booking_slug'] ?? $provider['booking_slug']) ?>" pattern="[a-z0-9-]{3,90}" required>
-      <p class="muted">Use lowercase letters, numbers, and hyphens. Your booking page will be /book/<?= htmlspecialchars($_POST['booking_slug'] ?? $provider['booking_slug']) ?>.</p>
+      <p class="muted">Use lowercase letters, numbers, and hyphens. Your booking page will be 
+	  <input readonly value="<?= $bookLink ?>" onclick="this.select()">
+	  </p>
       <button type="submit">Save profile</button>
     </form>
   </div>

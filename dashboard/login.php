@@ -1,12 +1,12 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
 
-if (current_provider()) { header('Location: /dashboard/index.php'); exit; }
+if (current_provider()) { header('Location: /dashboard/bookings.php'); exit; }
 
 $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (login($_POST['email'] ?? '', $_POST['password'] ?? '')) {
-        header('Location: /dashboard/index.php'); exit;
+        header('Location: /dashboard/bookings.php'); exit;
     }
     $error = 'Invalid email or password.';
 }
@@ -17,6 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <title>Log In — BookAppointment.me</title>
   <link rel="stylesheet" href="/assets/css/style.css">
+  <meta name="robots" content="noindex, nofollow">
+
 </head>
 <body>
 <div class="container" style="max-width:420px;">

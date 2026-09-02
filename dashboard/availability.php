@@ -58,6 +58,7 @@ $blocked = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="UTF-8">
   <title>Availability — BookAppointment.me</title>
   <link rel="stylesheet" href="/assets/css/style.css">
+  <meta name="robots" content="noindex, nofollow">
 </head>
 <body>
 <?php include __DIR__ . '/_nav.php'; ?>

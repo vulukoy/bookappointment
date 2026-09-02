@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /includes/
+Disallow: /public/book.php
+Disallow: /public/cancel.php
+
+Sitemap: http://bookappointment.me/sitemap.xml

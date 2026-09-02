@@ -1,12 +1,12 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
 
-if (current_provider()) { header('Location: /dashboard/index.php'); exit; }
+if (current_provider()) { header('Location: /dashboard/bookings.php'); exit; }
 
 $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     [$ok, $err] = signup($_POST['username'] ?? '', $_POST['business_name'] ?? '', $_POST['email'] ?? '', $_POST['password'] ?? '');
-    if ($ok) { header('Location: /dashboard/index.php'); exit; }
+    if ($ok) { header('Location: /dashboard/bookings.php'); exit; }
     $error = $err;
 }
 ?>
@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <title>Sign Up — BookAppointment.me</title>
   <link rel="stylesheet" href="/assets/css/style.css">
+  <meta name="robots" content="noindex, nofollow">
 </head>
 <body>
 <div class="container" style="max-width:420px;">

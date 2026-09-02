@@ -1,7 +1,7 @@
 <nav class="topbar">
-  <a href="/dashboard/index.php">📅 BookAppointment.me</a>
+  <a href="/index.php">📅 BookAppointment.me</a>
   <div class="links">
-    <a href="/dashboard/index.php">Bookings</a>
+    <a href="/dashboard/bookings.php">Bookings</a>
     <a href="/dashboard/services.php">Services</a>
     <a href="/dashboard/availability.php">Availability</a>
     <a href="/dashboard/profile.php">Profile</a>

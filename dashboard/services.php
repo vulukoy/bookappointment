@@ -42,6 +42,7 @@ $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="UTF-8">
   <title>Services — BookAppointment.me</title>
   <link rel="stylesheet" href="/assets/css/style.css">
+  <meta name="robots" content="noindex, nofollow">
 </head>
 <body>
 <?php include __DIR__ . '/_nav.php'; ?>
