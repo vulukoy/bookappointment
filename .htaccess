@@ -1,4 +1,8 @@
 RewriteEngine On
 
+# Redirect /index.php to root (avoids duplicate URL for homepage)
+RewriteCond %{THE_REQUEST} /index\.php[?\s] [NC]
+RewriteRule ^index\.php$ / [L,R=301]
+
 # Clean public booking pages, e.g. /book/benvolkan
 RewriteRule ^book/([a-z0-9-]+)/?$ public/book.php?u=$1 [L,QSA,NC]

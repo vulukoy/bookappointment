@@ -4,7 +4,8 @@
 function db(): PDO {
     static $pdo = null;
     if ($pdo === null) {
-        $host = 'fdb1031.runhosting.com';           // from your host's DB panel
+        //$host = 'fdb1031.runhosting.com';           // from your host's DB panel
+		$host = 'pdb1054.runhosting.com';
         $dbname = '4461901_appt'; // from your host's DB panel
         $user = '4461901_appt';           // from your host's DB panel
         $pass = 'tib@@pcwmd1';

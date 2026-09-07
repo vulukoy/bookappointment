@@ -263,7 +263,7 @@
 
 <div class="wrap">
   <nav class="nav">
-    <a href="/index.php" class="logo"><span class="dot"></span>BookAppointment.me</a>
+    <a href="/" class="logo"><span class="dot"></span>BookAppointment.me</a>
     <div class="nav-links">
       <a href="#how">How it works</a>
       <a href="/dashboard/login.php">Log in</a>

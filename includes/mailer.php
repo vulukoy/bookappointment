@@ -102,7 +102,7 @@ function send_booking_confirmation_email(array $booking, array $service, array $
         $subject,
         $body,
         default_from_address(),
-        $businessName
+        'BookAppointment'
     );
 }
 
@@ -127,6 +127,6 @@ function send_provider_notification_email(array $booking, array $service, array 
         $subject,
         $body,
         default_from_address(),
-        'BookMe'
+        'BookAppointment'
     );
 }
